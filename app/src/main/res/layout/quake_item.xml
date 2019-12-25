@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="@dimen/list_item_height"
+        android:layout_height="@dimen/list_item_height"
+        android:gravity="center_vertical"
+        android:id="@+id/mangitude_view"
+        android:paddingLeft="16dp"
+        android:text="5.0"/>
+    <TextView
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="@dimen/list_item_height"
+        android:gravity="center_vertical"
+        android:id="@+id/location_view"
+        android:paddingLeft="48dp"
+        android:text="Location"/>
+    <TextView
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="@dimen/list_item_height"
+        android:gravity="center_vertical"
+        android:id="@+id/date_view"
+        android:text="Date"/>
+
+</LinearLayout>
