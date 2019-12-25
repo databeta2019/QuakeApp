@@ -16,49 +16,82 @@
 package com.example.android.quakereport;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class EarthquakeActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+    private static final String USGS_QUERY_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
+        EarthQuakeAsyncTask task = new EarthQuakeAsyncTask();
+        task.execute(USGS_QUERY_URL);
+    }
 
-//        // Create a fake list of earthquake locations.
-//        ArrayList<EarthQuakeDetails> earthquakes = new ArrayList<>();
-//        Calendar c =Calendar.getInstance();
-//        c.set(1992,4,5);
-//        earthquakes.add(new EarthQuakeDetails(5.0,"San Francisco",c.getTime()));
-//        c.set(2000,4,5);
-//        earthquakes.add(new EarthQuakeDetails(5.0,"London", c.getTime()));
-//        c.set(2006,3,22);
-//        earthquakes.add(new EarthQuakeDetails(5.0,"Tokyo", c.getTime()));
-//        c.set(2010,6,25);
-//        earthquakes.add(new EarthQuakeDetails(5.0,"Rio de Janerio", c.getTime()));
-//        c.set(2016,8,17);
-//        earthquakes.add(new EarthQuakeDetails(5.0,"Moscow", c.getTime()));
-//        c.set(2012,9,9);
-//        earthquakes.add(new EarthQuakeDetails(5.0,"Mexico City", c.getTime()));
-        ArrayList<EarthQuakeDetails> earthquakes = QueryUtils.extractEarthquakes();
+
+    private class EarthQuakeAsyncTask extends AsyncTask<String, Void, List<EarthQuakeDetails>> {
+
+        @Override
+        protected List<EarthQuakeDetails> doInBackground(String... urls) {
+            if (urls.length < 1)
+                return null;
+            if (urls[0] == null)
+                return null;
+            List<EarthQuakeDetails> earthquakes = QueryUtils.fetchEarthquakeData(urls[0]);
+            return earthquakes;
+        }
+
+        @Override
+        protected void onPostExecute(List<EarthQuakeDetails> event) {
+            if (event == null)
+                return;
+            ;
+            updateUi(event);
+        }
+    }
+
+    private void updateUi(List<EarthQuakeDetails> event) {
+        final ArrayList<EarthQuakeDetails> earthquakes = new ArrayList<EarthQuakeDetails>(event);
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
 
         // Create a new {@link ArrayAdapter} of earthquakes
-        EarthQuakeAdaptor earthQuakeAdaptor = new EarthQuakeAdaptor(this,earthquakes);
+        EarthQuakeAdaptor earthQuakeAdaptor = new EarthQuakeAdaptor(this, earthquakes);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(earthQuakeAdaptor);
+
+
+        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                EarthQuakeDetails currentQuake = earthquakes.get(i);
+                String url = currentQuake.getmUrl();
+
+                // Visit Website
+                Uri uri = Uri.parse(url);
+                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(websiteIntent);
+            }
+        });
+
     }
 }

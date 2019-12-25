@@ -19,9 +19,8 @@ import java.util.Date;
 
 public class EarthQuakeAdaptor extends ArrayAdapter<EarthQuakeDetails> {
 
-    public EarthQuakeAdaptor(Context context, ArrayList<EarthQuakeDetails> quakes)
-    {
-        super(context,0,quakes);
+    public EarthQuakeAdaptor(Context context, ArrayList<EarthQuakeDetails> quakes) {
+        super(context, 0, quakes);
     }
 
 
@@ -29,9 +28,9 @@ public class EarthQuakeAdaptor extends ArrayAdapter<EarthQuakeDetails> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View listViewItem = convertView;
-        if(listViewItem == null) {
+        if (listViewItem == null) {
             listViewItem = LayoutInflater.from(getContext())
-                    .inflate(R.layout.quake_item,parent,false);
+                    .inflate(R.layout.quake_item, parent, false);
         }
         EarthQuakeDetails currentQuake = getItem(position);
 
@@ -42,7 +41,7 @@ public class EarthQuakeAdaptor extends ArrayAdapter<EarthQuakeDetails> {
         magnitudeText.setText(formatMagnitude(currentQuake.getmMagnitude()));
 
 
-        GradientDrawable magnitudeCircle  = (GradientDrawable) magnitudeText.getBackground();
+        GradientDrawable magnitudeCircle = (GradientDrawable) magnitudeText.getBackground();
         magnitudeCircle.setColor(getMagnitudeColor(currentQuake.getmMagnitude()));
 
         String locationString = currentQuake.getmLocation();
@@ -74,7 +73,7 @@ public class EarthQuakeAdaptor extends ArrayAdapter<EarthQuakeDetails> {
     private int getMagnitudeColor(double magnitudeValue) {
         int magnitudeColorResourceId;
         int magnitude = (int) Math.floor(magnitudeValue);
-        switch (magnitude){
+        switch (magnitude) {
             case 0:
             case 1:
                 magnitudeColorResourceId = R.color.magnitude1;
@@ -122,24 +121,24 @@ public class EarthQuakeAdaptor extends ArrayAdapter<EarthQuakeDetails> {
     }
 
     private String formatProximity(String location) {
-       int index = location.indexOf("of");
-       if(index == -1)
-           return "Near the";
-       else
-           return location.substring(0,index+2);
+        int index = location.indexOf("of");
+        if (index == -1)
+            return "Near the";
+        else
+            return location.substring(0, index + 2);
     }
 
 
     private String formatLocation(String location) {
         int index = location.indexOf("of");
-        if(index == -1)
+        if (index == -1)
             return location;
         else
-            return location.substring(index+2);
+            return location.substring(index + 2);
     }
 
 
-    private  String formatMagnitude(double magnitude) {
+    private String formatMagnitude(double magnitude) {
         DecimalFormat magFormat = new DecimalFormat("0.0");
         return magFormat.format(magnitude);
     }
