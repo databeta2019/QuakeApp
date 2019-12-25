@@ -5,12 +5,12 @@ import java.util.Date;
 public class EarthQuakeDetails {
     private double mMagnitude;
     private String mLocation;
-    private Date mDate;
+    private long mTimeInMilliseconds;
 
-    public EarthQuakeDetails(double mMagnitude, String mLocation, Date mDate) {
+    public EarthQuakeDetails(double mMagnitude, String mLocation, long mTimeInMilliseconds) {
         this.mMagnitude = mMagnitude;
         this.mLocation = mLocation;
-        this.mDate = mDate;
+        this.mTimeInMilliseconds = mTimeInMilliseconds;
     }
 
     public double getmMagnitude() {
@@ -21,8 +21,7 @@ public class EarthQuakeDetails {
         return mLocation;
     }
 
-    public Date getmDate() {
-        return mDate;
+    public long getmTimeInMilliseconds() {
+        return mTimeInMilliseconds;
     }
-
 }
