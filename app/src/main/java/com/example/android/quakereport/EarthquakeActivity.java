@@ -16,7 +16,9 @@
 package com.example.android.quakereport;
 
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,40 +34,56 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<EarthQuakeDetails>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     private static final String USGS_QUERY_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
-
+    private static final int LOADER_ID = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
-        EarthQuakeAsyncTask task = new EarthQuakeAsyncTask();
-        task.execute(USGS_QUERY_URL);
+        LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(LOADER_ID,null, this);
+//        EarthQuakeAsyncTask task = new EarthQuakeAsyncTask();
+//        task.execute(USGS_QUERY_URL);
+    }
+
+    @Override
+    public Loader<List<EarthQuakeDetails>> onCreateLoader(int i, Bundle bundle) {
+        return new EarthQuakeLoader(this, USGS_QUERY_URL);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<EarthQuakeDetails>> loader, List<EarthQuakeDetails> earthQuakeDetails) {
+        updateUi(earthQuakeDetails);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<EarthQuakeDetails>> loader) {
+        updateUi(new ArrayList<EarthQuakeDetails>());
     }
 
 
-    private class EarthQuakeAsyncTask extends AsyncTask<String, Void, List<EarthQuakeDetails>> {
-
-        @Override
-        protected List<EarthQuakeDetails> doInBackground(String... urls) {
-            if (urls.length < 1)
-                return null;
-            if (urls[0] == null)
-                return null;
-            List<EarthQuakeDetails> earthquakes = QueryUtils.fetchEarthquakeData(urls[0]);
-            return earthquakes;
-        }
-
-        @Override
-        protected void onPostExecute(List<EarthQuakeDetails> event) {
-            if (event == null)
-                return;
-            ;
-            updateUi(event);
-        }
-    }
+//    private class EarthQuakeAsyncTask extends AsyncTask<String, Void, List<EarthQuakeDetails>> {
+//
+//        @Override
+//        protected List<EarthQuakeDetails> doInBackground(String... urls) {
+//            if (urls.length < 1)
+//                return null;
+//            if (urls[0] == null)
+//                return null;
+//            List<EarthQuakeDetails> earthquakes = QueryUtils.fetchEarthquakeData(urls[0]);
+//            return earthquakes;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(List<EarthQuakeDetails> event) {
+//            if (event == null)
+//                return;
+//            updateUi(event);
+//        }
+//    }
 
     private void updateUi(List<EarthQuakeDetails> event) {
         final ArrayList<EarthQuakeDetails> earthquakes = new ArrayList<EarthQuakeDetails>(event);
