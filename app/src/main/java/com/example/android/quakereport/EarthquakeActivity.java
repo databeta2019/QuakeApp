@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -110,6 +111,10 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
                 startActivity(websiteIntent);
             }
         });
+
+        // Empty View Stuf
+        TextView emptyView = (TextView) findViewById(R.id.empty_view);
+        earthquakeListView.setEmptyView(emptyView);
 
     }
 }
