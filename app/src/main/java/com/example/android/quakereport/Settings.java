@@ -1,6 +1,7 @@
 package com.example.android.quakereport;
 
 import android.content.SharedPreferences;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -23,14 +24,28 @@ public class Settings extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.settings);
 
-            Preference preference = findPreference(getString(R.string.settings_min_magnitude_key));
-            bindPreferenceSummaryToValue(preference);
+            Preference magPreference = findPreference(getString(R.string.settings_min_magnitude_key));
+            bindPreferenceSummaryToValue(magPreference);
+
+
+            Preference orderPreference = findPreference(getString(R.string.settings_order_by_key));
+            bindPreferenceSummaryToValue(orderPreference);
+
         }
 
         @Override
         public boolean onPreferenceChange(Preference preference, Object o) {
             String value = o.toString();
-            preference.setSummary(value);
+            if(preference instanceof ListPreference) {
+                ListPreference listPreference = (ListPreference) preference;
+                int index = listPreference.findIndexOfValue(value);
+                if(index >= 0) {
+                    CharSequence [] labels = listPreference.getEntries();
+                    listPreference.setSummary(labels[index]);
+                }
+            } else {
+                preference.setSummary(value);
+            }
             return true;
         }
 
