@@ -17,8 +17,11 @@ package com.example.android.quakereport;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,7 +31,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,10 +49,21 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
-        LoaderManager loaderManager = getLoaderManager();
-        loaderManager.initLoader(LOADER_ID,null, this);
-//        EarthQuakeAsyncTask task = new EarthQuakeAsyncTask();
-//        task.execute(USGS_QUERY_URL);
+
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        if(isConnected) {
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(LOADER_ID,null, this);
+        } else {
+            HideProgressBar();
+            Toast.makeText(this,"No Internet Connection",Toast.LENGTH_SHORT).show();
+            SetEmptyView();
+        }
     }
 
     @Override
@@ -57,7 +73,21 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public void onLoadFinished(Loader<List<EarthQuakeDetails>> loader, List<EarthQuakeDetails> earthQuakeDetails) {
+        HideProgressBar();
+        SetEmptyView();
         updateUi(earthQuakeDetails);
+    }
+
+    private void SetEmptyView() {
+        TextView emptyView = (TextView) findViewById(R.id.empty_view);
+        emptyView.setText(R.string.empty_message);
+
+    }
+
+    private void HideProgressBar() {
+        // Stop Progress Bar
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_circular);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     @Override
