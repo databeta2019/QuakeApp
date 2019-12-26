@@ -20,13 +20,17 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -43,7 +47,7 @@ import java.util.List;
 public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<EarthQuakeDetails>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
-    private static final String USGS_QUERY_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
+    private static final String USGS_QUERY_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query";
     private static final int LOADER_ID = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +72,18 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public Loader<List<EarthQuakeDetails>> onCreateLoader(int i, Bundle bundle) {
-        return new EarthQuakeLoader(this, USGS_QUERY_URL);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String minMagnitude = preferences.getString(
+                getString(R.string.settings_min_magnitude_key),
+                getString(R.string.settings_min_magnitude_default)
+        );
+        Uri baseUri = Uri.parse(USGS_QUERY_URL);
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+        uriBuilder.appendQueryParameter("format", "geojson");
+        uriBuilder.appendQueryParameter("limit", "10");
+        uriBuilder.appendQueryParameter("minmag", minMagnitude);
+        uriBuilder.appendQueryParameter("orderby", "time");
+        return new EarthQuakeLoader(this, uriBuilder.toString());
     }
 
     @Override
@@ -94,27 +109,6 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     public void onLoaderReset(Loader<List<EarthQuakeDetails>> loader) {
         updateUi(new ArrayList<EarthQuakeDetails>());
     }
-
-
-//    private class EarthQuakeAsyncTask extends AsyncTask<String, Void, List<EarthQuakeDetails>> {
-//
-//        @Override
-//        protected List<EarthQuakeDetails> doInBackground(String... urls) {
-//            if (urls.length < 1)
-//                return null;
-//            if (urls[0] == null)
-//                return null;
-//            List<EarthQuakeDetails> earthquakes = QueryUtils.fetchEarthquakeData(urls[0]);
-//            return earthquakes;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<EarthQuakeDetails> event) {
-//            if (event == null)
-//                return;
-//            updateUi(event);
-//        }
-//    }
 
     private void updateUi(List<EarthQuakeDetails> event) {
         final ArrayList<EarthQuakeDetails> earthquakes = new ArrayList<EarthQuakeDetails>(event);
@@ -146,5 +140,23 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         TextView emptyView = (TextView) findViewById(R.id.empty_view);
         earthquakeListView.setEmptyView(emptyView);
 
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.action_settings) {
+            Intent settings  = new Intent(this,Settings.class);
+            startActivity(settings);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
